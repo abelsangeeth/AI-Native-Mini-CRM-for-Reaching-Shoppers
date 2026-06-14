@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XENO // AI-Native Mini CRM</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <i class="fa-solid fa-bolt brand-icon"></i>
+        <span>XENO</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="#dashboard" class="nav-item active" id="nav-dashboard">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        <a href="#customers" class="nav-item" id="nav-customers">
+          <i class="fa-solid fa-users"></i> Ingestion & Data
+        </a>
+        <a href="#segments" class="nav-item" id="nav-segments">
+          <i class="fa-solid fa-arrows-to-eye"></i> Shopper Segments
+        </a>
+        <a href="#campaigns" class="nav-item" id="nav-campaigns">
+          <i class="fa-solid fa-paper-plane"></i> Campaign Manager
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-indicator">
+          <span class="pulse-dot green"></span>
+          <span>CRM Active (Port 3000)</span>
+        </div>
+        <div class="status-indicator">
+          <span class="pulse-dot blue"></span>
+          <span>Channel API (Port 3001)</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="top-header">
+        <h1 id="page-title">Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn btn-outline" id="btn-reseed">
+            <i class="fa-solid fa-rotate"></i> Re-seed DB
+          </button>
+          <button class="btn btn-primary" id="toggle-ai-chat">
+            <i class="fa-solid fa-robot"></i> AI CRM Assistant
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <div class="view-container">
+        
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view">
+          <!-- Metrics Row -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon blue-bg">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="metric-info">
+                <h3>Total Shoppers</h3>
+                <p id="metric-shoppers">0</p>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon green-bg">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+              <div class="metric-info">
+                <h3>Total Revenue</h3>
+                <p id="metric-revenue">$0.00</p>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon orange-bg">
+                <i class="fa-solid fa-bullhorn"></i>
+              </div>
+              <div class="metric-info">
+                <h3>Campaigns Run</h3>
+                <p id="metric-campaigns">0</p>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon gold-bg">
+                <i class="fa-solid fa-sack-dollar"></i>
+              </div>
+              <div class="metric-info">
+                <h3>Campaign ROI</h3>
+                <p id="metric-roi">$0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom charts & table grid -->
+          <div class="dashboard-grid">
+            <!-- Recent Campaigns -->
+            <div class="dashboard-card card-large">
+              <div class="card-header">
+                <h2>Active Campaign Performance</h2>
+              </div>
+              <div class="card-body">
+                <div class="campaigns-list" id="active-campaigns-container">
+                  <div class="empty-state">No campaigns run yet. Navigate to Campaign Manager to start one.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Conversion Funnel Summary -->
+            <div class="dashboard-card card-small">
+              <div class="card-header">
+                <h2>Average Engagement Rates</h2>
+              </div>
+              <div class="card-body">
+                <div class="funnel-container">
+                  <div class="funnel-bar">
+                    <span class="funnel-label">Delivery</span>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar bg-blue" id="funnel-delivery" style="width: 0%"></div>
+                    </div>
+                    <span class="funnel-percentage" id="funnel-delivery-val">0%</span>
+                  </div>
+                  <div class="funnel-bar">
+                    <span class="funnel-label">Open Rate</span>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar bg-purple" id="funnel-open" style="width: 0%"></div>
+                    </div>
+                    <span class="funnel-percentage" id="funnel-open-val">0%</span>
+                  </div>
+                  <div class="funnel-bar">
+                    <span class="funnel-label">Click Rate</span>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar bg-orange" id="funnel-click" style="width: 0%"></div>
+                    </div>
+                    <span class="funnel-percentage" id="funnel-click-val">0%</span>
+                  </div>
+                  <div class="funnel-bar">
+                    <span class="funnel-label">Conversion</span>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar bg-green" id="funnel-conversion" style="width: 0%"></div>
+                    </div>
+                    <span class="funnel-percentage" id="funnel-conversion-val">0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- INGESTION & DATA VIEW -->
+        <section id="view-customers" class="view hidden">
+          <div class="split-layout">
+            <!-- Ingest forms -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Data Ingestion Engine</h2>
+              </div>
+              <div class="card-body">
+                <!-- Ingest Customer -->
+                <form id="form-ingest-customer" class="form-container">
+                  <h3><i class="fa-solid fa-user-plus"></i> Ingest Customer</h3>
+                  <div class="form-group">
+                    <label for="cust-name">Full Name</label>
+                    <input type="text" id="cust-name" required placeholder="e.g. Alex Rivera">
+                  </div>
+                  <div class="form-group">
+                    <label for="cust-email">Email Address</label>
+                    <input type="email" id="cust-email" required placeholder="e.g. alex.r@example.com">
+                  </div>
+                  <div class="form-group">
+                    <label for="cust-phone">Phone Number</label>
+                    <input type="tel" id="cust-phone" required placeholder="e.g. +15559876">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">Submit Customer Ingest</button>
+                </form>
+
+                <hr class="form-divider">
+
+                <!-- Ingest Order -->
+                <form id="form-ingest-order" class="form-container">
+                  <h3><i class="fa-solid fa-cart-shopping"></i> Ingest Customer Order</h3>
+                  <div class="form-group">
+                    <label for="order-email">Customer Email</label>
+                    <input type="email" id="order-email" required placeholder="e.g. alex.r@example.com">
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="order-amount">Order Value ($)</label>
+                      <input type="number" step="0.01" id="order-amount" required placeholder="99.99">
+                    </div>
+                    <div class="form-group">
+                      <label for="order-status">Order Status</label>
+                      <select id="order-status" required>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="refunded">Refunded</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="order-item-name">Purchased Item</label>
+                    <input type="text" id="order-item-name" required placeholder="e.g. Running Shoes">
+                  </div>
+                  <div class="form-group">
+                    <label for="order-item-category">Category</label>
+                    <input type="text" id="order-item-category" required placeholder="e.g. Shoes">
+                  </div>
+                  <button type="submit" class="btn btn-success btn-block">Submit Order Ingest</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Ingested Lists Tables -->
+            <div class="card card-wide">
+              <div class="tab-header">
+                <button class="tab-btn active" id="tab-btn-customers">Shoppers Database</button>
+                <button class="tab-btn" id="tab-btn-orders">Purchase Orders</button>
+              </div>
+              <div class="card-body">
+                <!-- Shoppers Table -->
+                <div class="table-container" id="container-shoppers-table">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Churn Risk</th>
+                        <th>Joined At</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-customers-body">
+                      <!-- Dynamically Loaded -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="table-container hidden" id="container-orders-table">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Shopper Name</th>
+                        <th>Email</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Items Bought</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-orders-body">
+                      <!-- Dynamically Loaded -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SHOPPER SEGMENTS VIEW -->
+        <section id="view-segments" class="view hidden">
+          <div class="split-layout">
+            <!-- Create Segment -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Build Shopper Segment</h2>
+              </div>
+              <div class="card-body">
+                <form id="form-create-segment" class="form-container">
+                  <div class="form-group">
+                    <label for="seg-name">Segment Name</label>
+                    <input type="text" id="seg-name" required placeholder="e.g. Coffee Spenders">
+                  </div>
+                  <div class="form-group">
+                    <label for="seg-desc">Description</label>
+                    <textarea id="seg-desc" rows="2" placeholder="e.g. Shoppers targeting coffee beans."></textarea>
+                  </div>
+                  
+                  <h3>Targeting Criteria Rules</h3>
+                  <div class="form-group">
+                    <label for="seg-rule-field">Attribute Field</label>
+                    <select id="seg-rule-field" required>
+                      <option value="order_amount">Individual Order Value ($)</option>
+                      <option value="item_category">Purchased Item Category</option>
+                      <option value="recency_days">Recency (Purchased in Last X Days)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="seg-rule-op">Operator</label>
+                      <select id="seg-rule-op" required>
+                        <option value=">=">Greater than or Equal (>=)</option>
+                        <option value="<=">Less than or Equal (<=)</option>
+                        <option value="equals">Equals (Exact / Contains)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="seg-rule-val">Value</label>
+                      <input type="text" id="seg-rule-val" required placeholder="e.g. 150 or Coffee">
+                    </div>
+                  </div>
+                  
+                  <button type="submit" class="btn btn-primary btn-block">Save Segment</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Segments List -->
+            <div class="card card-wide">
+              <div class="card-header">
+                <h2>Configured Audiences</h2>
+              </div>
+              <div class="card-body">
+                <div class="segments-grid" id="segments-container">
+                  <!-- Dynamically Loaded -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CAMPAIGN MANAGER VIEW -->
+        <section id="view-campaigns" class="view hidden">
+          <div class="split-layout">
+            <!-- Create Campaign -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Launch Campaign</h2>
+              </div>
+              <div class="card-body">
+                <form id="form-create-campaign" class="form-container">
+                  <div class="form-group">
+                    <label for="camp-name">Campaign Title</label>
+                    <input type="text" id="camp-name" required placeholder="e.g. Mid-Summer VIP promo">
+                  </div>
+                  <div class="form-group">
+                    <label for="camp-segment">Target Audience Segment</label>
+                    <select id="camp-segment" required>
+                      <!-- Dynamically Loaded -->
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="camp-channel">Messaging Channel</label>
+                    <select id="camp-channel" required>
+                      <option value="WhatsApp">WhatsApp</option>
+                      <option value="SMS">SMS</option>
+                      <option value="Email">Email</option>
+                      <option value="RCS">RCS (Rich Communication Services)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="camp-template">Personalized Message Template (Variant A)</label>
+                    <textarea id="camp-template" rows="3" required placeholder="Hi {name}! Thanks for shopping. Use coupon CODE10 for 10% off."></textarea>
+                    <span class="help-text">Use <code>{name}</code> to inject recipient's name dynamically.</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="camp-variant-1">Copy Variant B (Optional A/B Test)</label>
+                    <textarea id="camp-variant-1" rows="2" placeholder="e.g. Alternate friendly copy here..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="camp-variant-2">Copy Variant C (Optional A/B Test)</label>
+                    <textarea id="camp-variant-2" rows="2" placeholder="e.g. Alternate urgent copy here..."></textarea>
+                  </div>
+                  
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa-solid fa-paper-plane"></i> Dispatch Campaign
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Campaign list details -->
+            <div class="card card-wide">
+              <div class="card-header">
+                <h2>Campaign History</h2>
+              </div>
+              <div class="card-body">
+                <div class="campaigns-grid-container" id="campaigns-history-list">
+                  <!-- Dynamically Loaded -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- AI CRM ASSISTANT DRAWER -->
+    <div class="ai-drawer collapsed" id="ai-chat-drawer">
+      <div class="drawer-header">
+        <h3><i class="fa-solid fa-robot"></i> XENO AI Assistant</h3>
+        <button class="close-btn" id="close-ai-chat"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="drawer-body">
+        <div class="chat-logs" id="chat-logs-container">
+          <div class="chat-bubble ai">
+            Hello! I am XENO's AI-Native helper. You can talk to me in natural language. Try saying:
+            <ul class="chat-prompts">
+              <li class="chat-prompt-link">"Find shoppers who spent more than $150"</li>
+              <li class="chat-prompt-link">"Create a segment for coffee lovers"</li>
+              <li class="chat-prompt-link">"Draft a recent shopper segment"</li>
+            </ul>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" placeholder="Ask XENO AI...">
+          <button id="btn-send-chat" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG SIMULATOR CONSOLE BOTTOM PANEL -->
+    <footer class="console-panel">
+      <div class="console-header">
+        <div class="console-title">
+          <i class="fa-solid fa-terminal console-icon"></i>
+          <span>Live Message Delivery Simulator Logs</span>
+        </div>
+        <div class="console-controls">
+          <button class="console-btn" id="clear-console"><i class="fa-solid fa-trash-can"></i> Clear Logs</button>
+        </div>
+      </div>
+      <div class="console-body" id="console-logs-container">
+        <div class="console-log-row system">
+          <span class="log-timestamp">[15:12:48]</span>
+          <span class="log-text">XENO CRM and Channel Simulator Initialized. Ready for campaigns!</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Campaign Detail Modal -->
+  <div class="modal hidden" id="campaign-detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-camp-title">Campaign Analysis</h2>
+        <button class="close-btn" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- Fatigue Exclusions alert -->
+        <div class="alert alert-warning hidden" id="modal-fatigue-banner" style="margin-bottom: 20px; padding: 12px; border-radius: 8px; font-size: 13px; background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309;">
+          <i class="fa-solid fa-triangle-exclamation"></i> <strong>Fatigue Guard Active:</strong> <span id="modal-fatigue-count">0</span> shopper(s) auto-excluded from this blast to prevent spam/churn.
+        </div>
+
+        <!-- Analytics dashboard inside modal -->
+        <div class="modal-metrics">
+          <div class="modal-metric">
+            <span class="m-val" id="modal-sent">0</span>
+            <span class="m-label">Dispatched</span>
+          </div>
+          <div class="modal-metric">
+            <span class="m-val" id="modal-delivered">0</span>
+            <span class="m-label">Delivered</span>
+          </div>
+          <div class="modal-metric">
+            <span class="m-val" id="modal-opened">0</span>
+            <span class="m-label">Opened</span>
+          </div>
+          <div class="modal-metric">
+            <span class="m-val" id="modal-clicked">0</span>
+            <span class="m-label">Clicked</span>
+          </div>
+          <div class="modal-metric">
+            <span class="m-val" id="modal-converted">0</span>
+            <span class="m-label">Converted</span>
+          </div>
+          <div class="modal-metric success">
+            <span class="m-val" id="modal-revenue">$0.00</span>
+            <span class="m-label">Campaign Revenue</span>
+          </div>
+        </div>
+
+        <!-- A/B Test Split Results -->
+        <div class="ab-test-section hidden" id="modal-ab-variants-container" style="margin-top: 20px; border-top: 1px solid var(--border-soft); padding-top: 20px;">
+          <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-flask"></i> A/B Test Copy Variant Performance</h3>
+          <div class="variants-ab-grid" id="modal-variants-ab-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <!-- Render cards dynamically -->
+          </div>
+        </div>
+
+        <h3>Individual Message Logs</h3>
+        <div class="table-container max-height-300">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Recipient Address</th>
+                <th>Message Draft</th>
+                <th>Status</th>
+                <th>Revenue</th>
+                <th>Last Update</th>
+              </tr>
+            </thead>
+            <tbody id="modal-logs-table-body">
+              <!-- Dynamically Loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

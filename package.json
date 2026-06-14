@@ -1,0 +1,27 @@
+{
+  "name": "xeno-ai-crm",
+  "version": "1.0.0",
+  "description": "AI-Native Mini CRM for Reaching Shoppers",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsnd --respawn --transpile-only src/index.ts",
+    "seed": "ts-node src/db/seed.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
+    "@types/sqlite3": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
