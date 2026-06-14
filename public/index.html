@@ -413,17 +413,35 @@
       </div>
       <div class="drawer-body">
         <div class="chat-logs" id="chat-logs-container">
-          <div class="chat-bubble ai">
-            Hello! I am XENO's AI-Native helper. You can talk to me in natural language. Try saying:
-            <ul class="chat-prompts">
-              <li class="chat-prompt-link" onclick="clickPrompt('Find shoppers who spent more than $150')">"Find shoppers who spent more than $150"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Create a segment for coffee lovers')">"Create a segment for coffee lovers"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Draft a recent shopper segment')">"Draft a recent shopper segment"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Show performance metrics report')">"Show performance metrics report"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Generate persona card for customer c1')">"Generate persona card for customer c1"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Run a winback campaign for high churn shoppers over SMS')">"Run a winback campaign for high churn shoppers over SMS"</li>
-              <li class="chat-prompt-link" onclick="clickPrompt('Explain how Fatigue Guard works')">"Explain how Fatigue Guard works"</li>
-            </ul>
+          <div class="chat-bubble ai" style="border-top-left-radius: 2px;">
+            <p><strong>Hello! I am your AI CRM Assistant.</strong> You can speak to me in plain English to build segments, analyze sales, or run campaigns.</p>
+            
+            <div style="margin-top: 12px; font-weight: 600; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">🔍 NL Segments</div>
+            <div class="chat-prompts">
+              <span class="chat-prompt-link" onclick="clickPrompt('Find shoppers who spent more than $150')">Find VIP spenders ($150+)</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('Create a segment for coffee lovers')">Segment coffee lovers</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('Draft a recent shopper segment')">Draft active shoppers (14 days)</span>
+            </div>
+            
+            <div style="margin-top: 12px; font-weight: 600; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">📈 Ask Your Data</div>
+            <div class="chat-prompts">
+              <span class="chat-prompt-link" onclick="clickPrompt('Show performance metrics report')">Show store metrics report</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('what is the campaign conversion rate?')">Show campaign conversion rates</span>
+            </div>
+            
+            <div style="margin-top: 12px; font-weight: 600; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">👤 Shopper Personas</div>
+            <div class="chat-prompts">
+              <span class="chat-prompt-link" onclick="clickPrompt('Generate persona card for customer c1')">Generate c1 profile card</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('show profile of Alex Rivera')">Explain Alex Rivera's behavior</span>
+            </div>
+
+            <div style="margin-top: 12px; font-weight: 600; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">🚀 Campaign Autopilot & FAQs</div>
+            <div class="chat-prompts">
+              <span class="chat-prompt-link" onclick="clickPrompt('Run a winback campaign for high churn shoppers over SMS')">Run Autopilot SMS Winback</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('Run a whatsapp campaign for coffee lovers')">Run Autopilot WhatsApp Coffee</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('Explain how Fatigue Guard works')">Explain Fatigue Guard</span>
+              <span class="chat-prompt-link" onclick="clickPrompt('how does revenue attribution work?')">Explain Revenue Attribution</span>
+            </div>
           </div>
         </div>
         <div class="chat-input-area">
