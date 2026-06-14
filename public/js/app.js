@@ -698,11 +698,32 @@ function appendChatBubble(sender, text) {
   const logsContainer = document.getElementById('chat-logs-container');
   const bubble = document.createElement('div');
   bubble.className = `chat-bubble ${sender}`;
-  // support markdown bold tags basic replacement
-  bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  if (sender === 'ai') {
+    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Parse double-quoted prompts into clickable spans
+    html = html.replace(/"(.*?)"/g, (match, p1) => {
+      if (p1.length < 100 && !p1.includes('{') && !p1.includes('}')) {
+        return `<span class="chat-prompt-link inline-prompt" style="font-size: inherit; font-weight: 500; text-decoration: underline; display: inline; cursor: pointer;" onclick="clickPrompt('${p1.replace(/'/g, "\\'")}')">"${p1}"</span>`;
+      }
+      return match;
+    });
+    // Replace newlines with breaks
+    html = html.replace(/\n/g, '<br>');
+    bubble.innerHTML = html;
+  } else {
+    bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  }
+  
   logsContainer.appendChild(bubble);
   logsContainer.scrollTop = logsContainer.scrollHeight;
 }
+
+// Global click helper for dynamic inline prompts
+window.clickPrompt = (promptText) => {
+  document.getElementById('chat-input').value = promptText;
+  submitAIChat();
+};
 
 function appendAICard(segData) {
   const logsContainer = document.getElementById('chat-logs-container');
