@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: xeno-ai-crm
+    env: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: CHANNEL_PORT
+        value: 3001
+      - key: CHANNEL_SERVICE_URL
+        value: http://localhost:3001/api/channel/send
+      - key: CRM_CALLBACK_URL
+        value: http://localhost:3000/api/callbacks/receipt
