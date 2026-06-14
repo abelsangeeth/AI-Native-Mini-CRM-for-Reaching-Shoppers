@@ -421,12 +421,14 @@ body {
   flex-direction: column;
   gap: 6px;
   margin-bottom: 16px;
+  min-width: 0;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  min-width: 0;
 }
 
 label {
@@ -445,6 +447,9 @@ input, select, textarea {
   color: var(--text-main);
   outline: none;
   transition: border-color var(--transition-fast);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus, select:focus, textarea:focus {
