@@ -578,7 +578,151 @@ export const handleAIChat = async (req: Request, res: Response) => {
   const cleanMsg = message.toLowerCase();
 
   try {
-    // 1. AI Campaign Autopilot Intent Parser
+    // 1. Conversational Analytics (Ask Your Data)
+    if (cleanMsg.includes('revenue') || cleanMsg.includes('sales') || cleanMsg.includes('performance') || cleanMsg.includes('metrics') || cleanMsg.includes('roi') || cleanMsg.includes('conversion') || cleanMsg.includes('open rate') || cleanMsg.includes('click rate')) {
+      const customersRes = await query.get<{ total: number }>('SELECT COUNT(*) AS total FROM customers');
+      const ordersRes = await query.get<{ total: number }>('SELECT SUM(amount) AS total FROM orders');
+      const campaignsRes = await query.get<{ total: number }>('SELECT COUNT(*) AS total FROM campaigns');
+      const campaignRevRes = await query.get<{ total: number }>('SELECT SUM(amount) AS total FROM orders WHERE campaign_id IS NOT NULL');
+
+      const logSentRes = await query.get<{ total: number }>("SELECT COUNT(*) AS total FROM communication_logs WHERE status != 'pending'");
+      const logOpenedRes = await query.get<{ total: number }>("SELECT COUNT(*) AS total FROM communication_logs WHERE status IN ('opened', 'read', 'clicked', 'converted')");
+      const logClickedRes = await query.get<{ total: number }>("SELECT COUNT(*) AS total FROM communication_logs WHERE status IN ('clicked', 'converted')");
+      const logConvRes = await query.get<{ total: number }>("SELECT COUNT(*) AS total FROM communication_logs WHERE status = 'converted'");
+
+      const totalCustomers = customersRes?.total || 0;
+      const totalRevenue = ordersRes?.total || 0;
+      const totalCampaigns = campaignsRes?.total || 0;
+      const campaignRevenue = campaignRevRes?.total || 0;
+
+      const sent = logSentRes?.total || 0;
+      const opened = logOpenedRes?.total || 0;
+      const clicked = logClickedRes?.total || 0;
+      const converted = logConvRes?.total || 0;
+
+      const openRate = sent > 0 ? ((opened / sent) * 100).toFixed(0) : '0';
+      const clickRate = opened > 0 ? ((clicked / opened) * 100).toFixed(0) : '0';
+      const convRate = clicked > 0 ? ((converted / clicked) * 100).toFixed(0) : '0';
+
+      return res.json({
+        reply: `I have compiled a real-time **Conversational Analytics Report** directly from your active database:
+
+📊 **CRM Business Summary:**
+* **Total Shoppers:** **${totalCustomers}**
+* **Total Store Sales:** **$${totalRevenue.toFixed(2)}**
+* **Total Campaigns Launched:** **${totalCampaigns}**
+* **Campaign Influenced Revenue:** **$${campaignRevenue.toFixed(2)}**
+
+📈 **Simulated Messaging Funnel Rates:**
+* **Total Dispatched:** **${sent}** messages
+* **Average Open Rate:** **${openRate}%**
+* **Average Click-Through Rate:** **${clickRate}%**
+* **Average Purchase Conversion Rate:** **${convRate}%**`
+      });
+    }
+
+    // 2. Shopper Persona Cards (AI-Generated on-the-fly)
+    if (cleanMsg.includes('persona') || cleanMsg.includes('profile') || cleanMsg.includes('shopper') || cleanMsg.includes('customer') || cleanMsg.match(/c_\w+/) || cleanMsg.match(/c\d+/)) {
+      const idMatch = message.match(/(c_\w+|c\d+)/i);
+      const emailMatch = message.match(/[\w.-]+@[\w.-]+\.\w+/);
+      
+      let customer: any = null;
+      if (idMatch) {
+        customer = await query.get<any>('SELECT * FROM customers WHERE id = ? OR id = ?', [idMatch[0].toLowerCase(), idMatch[0]]);
+      } else if (emailMatch) {
+        customer = await query.get<any>('SELECT * FROM customers WHERE email = ?', [emailMatch[0]]);
+      } else {
+        const customers = await query.all<any>('SELECT * FROM customers');
+        for (const c of customers) {
+          if (cleanMsg.includes(c.name.toLowerCase())) {
+            customer = c;
+            break;
+          }
+        }
+        if (!customer && customers.length > 0) {
+          customer = customers[0];
+        }
+      }
+
+      if (customer) {
+        const orders = await query.all<any>('SELECT * FROM orders WHERE customer_id = ?', [customer.id]);
+        const totalSpent = orders.reduce((sum, o) => sum + o.amount, 0);
+        const orderCount = orders.length;
+        const avgSpent = orderCount > 0 ? totalSpent / orderCount : 0;
+        
+        let categoriesList: string[] = [];
+        orders.forEach(o => {
+          try {
+            const items = JSON.parse(o.items);
+            items.forEach((it: any) => {
+              if (it.category && !categoriesList.includes(it.category)) {
+                categoriesList.push(it.category);
+              }
+            });
+          } catch {}
+        });
+        const categories = categoriesList.length > 0 ? categoriesList.join(', ') : 'General Retail';
+        
+        let behavior = '';
+        if (orderCount === 0) {
+          behavior = `is a newly registered shopper who hasn't placed any orders yet. Churn risk is currently predicted at ${customer.churn_risk_score}%.`;
+        } else if (orderCount >= 3) {
+          behavior = `is an active, high-frequency loyal shopper who has placed ${orderCount} orders averaging $${avgSpent.toFixed(2)} per ticket. They purchase items in the **${categories}** categories.`;
+        } else {
+          behavior = `is an occasional buyer with ${orderCount} order(s) totaling $${totalSpent.toFixed(2)}. Their average purchase amount is $${avgSpent.toFixed(2)}.`;
+        }
+        
+        const recencyMsg = customer.churn_risk_score >= 70 
+          ? `We predict a **High Churn Risk (${customer.churn_risk_score}%)** due to prolonged purchase inactivity. We recommend a proactive winback coupon code MISSYOU.`
+          : `They show low churn probability (predicted score of ${customer.churn_risk_score}%). Best engaged with upcoming VIP collections.`;
+
+        return res.json({
+          reply: `I have synthesized the **AI Shopper Persona Card** for **${customer.name}** (${customer.email}):
+
+👤 **Shopper Profile:**
+* **Customer ID:** \`${customer.id}\`
+* **Contact Phone:** \`${customer.phone}\`
+* **Engagement Segment:** **${customer.churn_risk_score >= 70 ? 'High Churn Risk' : 'Active VIP'}**
+
+🏷️ **AI Behavioral Synthesis:**
+${customer.name} ${behavior} ${recencyMsg}`
+        });
+      } else {
+        return res.json({
+          reply: "I couldn't find a specific shopper in the database matching that query. You can request a persona for any active shopper (e.g. *'show profile of Alex'* or *'what is c1's persona?'*)."
+        });
+      }
+    }
+
+    // 3. System FAQs Guides
+    if (cleanMsg.includes('fatigue') || cleanMsg.includes('over-messaging')) {
+      return res.json({
+        reply: `🛡️ **XENO Fatigue Guard (Over-Messaging Protection):**
+* **How it works:** Before any campaign dispatch, the system checks recipient logs over the last **7 days**.
+* **Limit:** If a customer has received **2 or more messages** in this window, the system automatically filters them out of the campaign.
+* **Result:** This safeguards your sender reputation, keeps delivery rates high, and prevents subscriber fatigue/churn.`
+      });
+    }
+
+    if (cleanMsg.includes('attribution') || cleanMsg.includes('influenced') || cleanMsg.includes('connect')) {
+      return res.json({
+        reply: `💰 **XENO 72-Hour Revenue Attribution:**
+* **How it works:** When a new purchase order is ingested, XENO checks if that customer received a campaign communication in the preceding **72 hours**.
+* **Attribution:** If yes, the order is tagged with that campaign's ID.
+* **Benefit:** Allows marketers to trace exactly how much actual store revenue was influenced by each WhatsApp, SMS, or RCS campaign instead of just looking at open rates.`
+      });
+    }
+
+    if (cleanMsg.includes('ab test') || cleanMsg.includes('variants') || cleanMsg.includes('split')) {
+      return res.json({
+        reply: `🧪 **XENO A/B Testing & Copy Optimization:**
+* **How it works:** You can specify multiple copy templates (Variant A, B, and C) when creating a campaign.
+* **Split:** Dispatches are split round-robin among target segment shoppers.
+* **Auto-Winner:** As webhook callbacks stream click and conversion events back to the CRM, XENO computes engagement ratios and highlights the winner with a trophy badge in the analysis modal.`
+      });
+    }
+
+    // 4. AI Campaign Autopilot Intent Parser
     if (cleanMsg.includes('run') || cleanMsg.includes('send') || cleanMsg.includes('campaign') || cleanMsg.includes('autopilot') || cleanMsg.includes('engage')) {
       let goalName = 'Proactively re-engage high churn risk customers';
       let targetSegment = 'High Churn Risk (Score >= 70)';
@@ -610,7 +754,7 @@ export const handleAIChat = async (req: Request, res: Response) => {
       });
     }
 
-    // 2. AI Segment criteria generation parser
+    // 5. AI Segment criteria generation parser
     if (cleanMsg.includes('spend') || cleanMsg.includes('spent') || cleanMsg.includes('buy') || cleanMsg.includes('bought') || cleanMsg.includes('coffee')) {
       let segmentName = 'AI Generated Segment';
       let rules: { field: string; operator: string; value: string | number } = { field: 'order_amount', operator: '>=', value: 100 };
@@ -650,7 +794,7 @@ export const handleAIChat = async (req: Request, res: Response) => {
 
     // Default response
     return res.json({
-      reply: "Hello! I am XENO's AI-Native Assistant. You can describe shopper segments you want to target (e.g. 'coffee lovers') or ask me to run an autopilot flow (e.g. 'run a campaign to re-engage churn risk shoppers over SMS')."
+      reply: "Hello! I am XENO's AI-Native Assistant. Try asking me:\n\n* **Ask Your Data:** *\"what is our revenue?\"* or *\"show campaign performance metrics\"*\n* **Customer Profile:** *\"generate persona for c1\"* or *\"show profile of Alex\"*\n* **Campaign Autopilot:** *\"run a SMS winback campaign\"*\n* **System FAQ:** *\"how does fatigue guard work?\"*"
     });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
